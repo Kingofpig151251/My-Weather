@@ -1,4 +1,4 @@
-package com.example.myweather;
+package com.example.myweather.utils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;

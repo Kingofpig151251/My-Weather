@@ -1,13 +1,18 @@
-package com.example.myweather;
+package com.example.myweather.activities;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -17,6 +22,13 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
+import com.example.myweather.network.ApiRequestHandler;
+import com.example.myweather.utils.Constants;
+import com.example.myweather.managers.GetLocationNameManager;
+import com.example.myweather.utils.JsonParser;
+import com.example.myweather.utils.OnRequestCompletedListener;
+import com.example.myweather.managers.PreferencesManager;
+import com.example.myweather.R;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -25,6 +37,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity implements OnRequestCompletedListener {
     // region Variables
@@ -39,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements OnRequestComplete
     private TextView humidityDisplayTextView;
     private TextView weatherOutlookTextView;
     private TextView temperatureDisplayTextView;
+    private Button GoToForecastPageButton;
     // endregion
 
     // region Lifecycle Methods
@@ -56,7 +70,14 @@ public class MainActivity extends AppCompatActivity implements OnRequestComplete
         preferencesManager = new PreferencesManager(this);
         setupApiRequestHandler();
         requestLocationPermission();
+        GoToForecastPageButton = findViewById(R.id.GoToForecastPageButton);
+        GoToForecastPageButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, ForecastActivity.class);
+            startActivity(intent);
+        });
     }
+
+
     // endregion
 
     // region Permission Methods
@@ -112,12 +133,12 @@ public class MainActivity extends AppCompatActivity implements OnRequestComplete
     // region API Request Methods
     private void setupApiRequestHandler() {
         ApiRequestHandler apiRequestHandler = new ApiRequestHandler(this, this);
-        apiRequestHandler.makeRequests(Arrays.asList(Constants.BASE_API_URL + Constants.DATA_TYPE_FLW, Constants.BASE_API_URL + Constants.DATA_TYPE_RHRREAD));
+        apiRequestHandler.makeRequests(Arrays.asList(Constants.BASE_API_URL + Constants.DATA_TYPE_FLW, Constants.BASE_API_URL + Constants.DATA_TYPE_RHRREAD, Constants.BASE_API_URL + Constants.DATA_TYPE_FND));
     }
 
     private void updateLocationName(double latitude, double longitude) {
         String url = String.format(Locale.getDefault(), Constants.GEOCODING_API_URL, latitude, longitude, "37d9da6b6f7747e29085208abaa8b684");
-        new GetLocationNameTask(response -> {
+        new GetLocationNameManager(response -> {
             try {
                 JSONObject jsonObject = new JSONObject(response);
                 JSONObject results = jsonObject.getJSONArray("results").getJSONObject(0);
@@ -155,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements OnRequestComplete
             if (dataArray != null) {
                 for (int i = 0; i < dataArray.length(); i++) {
                     JSONObject data = JsonParser.getJsonObject(dataArray, i);
-                    if (JsonParser.getString(data, "place").equals("Hong Kong Observatory")) {
+                    if (Objects.equals(JsonParser.getString(data, "place"), "Hong Kong Observatory")) {
                         int temperature = JsonParser.getInt(data, "value");
                         temperatureDisplayTextView.setText(temperature + "˚");
                         break;
@@ -215,4 +236,26 @@ public class MainActivity extends AppCompatActivity implements OnRequestComplete
         Log.e("MainActivity", "Error: " + e.getMessage());
     }
     // endregion
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_set_theme) {
+            // Handle action for setting theme
+            return true;
+        } else if (id == R.id.action_exit) {
+            //show dialog to confirm exit
+            new AlertDialog.Builder(this).setTitle("Exit").setMessage("Are you sure you want to exit?").setPositiveButton("Yes", (dialog, which) -> finish()).setNegativeButton("No", null).show();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 }

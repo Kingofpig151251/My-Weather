@@ -1,4 +1,4 @@
-package com.example.myweather;
+package com.example.myweather.managers;
 
 import android.os.AsyncTask;
 import android.util.Log;
@@ -8,10 +8,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Scanner;
 
-public class GetLocationNameTask extends AsyncTask<String, Void, String> {
+public class GetLocationNameManager extends AsyncTask<String, Void, String> {
     private OnTaskCompleted listener;
 
-    public GetLocationNameTask(OnTaskCompleted listener) {
+    public GetLocationNameManager(OnTaskCompleted listener) {
         this.listener = listener;
     }
 

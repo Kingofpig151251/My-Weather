@@ -1,10 +1,12 @@
-package com.example.myweather;
+package com.example.myweather.network;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+
+import com.example.myweather.utils.OnRequestCompletedListener;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -130,6 +132,15 @@ public class ApiRequestHandler {
                 }
             }
         }
+
+        if (data.has("weatherForecast")) {
+            JSONArray weatherForecastData = data.optJSONArray("weatherForecast");
+            if (weatherForecastData != null) {
+                editor.putString("weatherForecast", weatherForecastData.toString());
+                Log.d("weatherForecast", weatherForecastData.toString());
+            }
+        }
+
         editor.apply();
     }
 }

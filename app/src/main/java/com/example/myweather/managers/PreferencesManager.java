@@ -1,7 +1,9 @@
-package com.example.myweather;
+package com.example.myweather.managers;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+
+import com.example.myweather.utils.Constants;
 
 public class PreferencesManager {
     private SharedPreferences sharedPreferences;
