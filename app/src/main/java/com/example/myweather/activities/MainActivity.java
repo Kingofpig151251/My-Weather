@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -55,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements OnRequestComplete
     private Button GoToForecastPageButton;
     // endregion
 
-    // region Lifecycle Methods
+    // region onCreate Methods
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,8 +77,6 @@ public class MainActivity extends AppCompatActivity implements OnRequestComplete
             startActivity(intent);
         });
     }
-
-
     // endregion
 
     // region Permission Methods
@@ -88,6 +87,10 @@ public class MainActivity extends AppCompatActivity implements OnRequestComplete
             setupLocationUpdates();
             try {
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+                Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                if (lastKnownLocation != null) {
+                    updateLocationName(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
+                }
             } catch (SecurityException e) {
                 Log.e("MainActivity", "Error requesting location updates: " + e.getMessage());
             }
@@ -247,11 +250,10 @@ public class MainActivity extends AppCompatActivity implements OnRequestComplete
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.action_set_theme) {
-            // Handle action for setting theme
+        if (id == R.id.action_show_developer) {
+            Toast.makeText(MainActivity.this, "Leung Tung Lam", Toast.LENGTH_SHORT).show();
             return true;
         } else if (id == R.id.action_exit) {
-            //show dialog to confirm exit
             new AlertDialog.Builder(this).setTitle("Exit").setMessage("Are you sure you want to exit?").setPositiveButton("Yes", (dialog, which) -> finish()).setNegativeButton("No", null).show();
             return true;
         }
