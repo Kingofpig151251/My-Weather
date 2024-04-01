@@ -1,15 +1,12 @@
 package com.example.myweather;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.StrictMode;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -24,25 +21,24 @@ import com.bumptech.glide.Glide;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements OnRequestCompletedListener {
     // region Variables
-    private static final String PREFS_NAME = "Weather";
-    private static final String BASE_API_URL = "https://data.weather.gov.hk/weatherAPI/opendata/weather.php?lang=en&dataType=";
-    private static final String DATA_TYPE_FLW = "flw";
-    private static final String DATA_TYPE_RHRREAD = "rhrread";
-
+    private PreferencesManager preferencesManager;
+    private Location lastLocation = null;
     private LocationManager locationManager;
     private LocationListener locationListener;
-    private TextView locationTextView;
-    private static final String GEOCODING_API_URL = "https://api.opencagedata.com/geocode/v1/json?q=%1$f+%2$f&key=%3$s";
-
+    private ImageView iconImageView;
+    private TextView locationDisplayTextView;
+    private TextView forecastDescriptionTextView;
+    private TextView lastUpdateTimeTextView;
+    private TextView humidityDisplayTextView;
+    private TextView weatherOutlookTextView;
+    private TextView temperatureDisplayTextView;
     // endregion
 
     // region Lifecycle Methods
@@ -50,18 +46,20 @@ public class MainActivity extends AppCompatActivity implements OnRequestComplete
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        locationTextView = findViewById(R.id.locationTextView);
+        iconImageView = findViewById(R.id.iconImageView);
+        locationDisplayTextView = findViewById(R.id.locationDisplayTextView);
+        forecastDescriptionTextView = findViewById(R.id.forecastDescriptionTextView);
+        lastUpdateTimeTextView = findViewById(R.id.lastUpdateTimeTextView);
+        humidityDisplayTextView = findViewById(R.id.humidityDisplayTextView);
+        weatherOutlookTextView = findViewById(R.id.weatherOutlookTextView);
+        temperatureDisplayTextView = findViewById(R.id.temperatureDisplayTextView);
+        preferencesManager = new PreferencesManager(this);
         setupApiRequestHandler();
         requestLocationPermission();
     }
     // endregion
 
-    // region Helper Methods
-    private void setupApiRequestHandler() {
-        ApiRequestHandler apiRequestHandler = new ApiRequestHandler(this, this);
-        apiRequestHandler.makeRequests(Arrays.asList(BASE_API_URL + DATA_TYPE_FLW, BASE_API_URL + DATA_TYPE_RHRREAD));
-    }
-
+    // region Permission Methods
     private void requestLocationPermission() {
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
@@ -75,14 +73,25 @@ public class MainActivity extends AppCompatActivity implements OnRequestComplete
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 1) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                setupLocationUpdates();
+            }
+        }
+    }
+
     private void setupLocationUpdates() {
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(@NonNull Location location) {
-                double latitude = location.getLatitude();
-                double longitude = location.getLongitude();
-                updateLocationName(latitude, longitude);
+                if (lastLocation == null || lastLocation.distanceTo(location) > 500) {
+                    updateLocationName(location.getLatitude(), location.getLongitude());
+                    lastLocation = location;
+                }
             }
 
             @Override
@@ -90,46 +99,72 @@ public class MainActivity extends AppCompatActivity implements OnRequestComplete
             }
 
             @Override
-            public void onProviderEnabled(String provider) {
+            public void onProviderEnabled(@NonNull String provider) {
             }
 
             @Override
-            public void onProviderDisabled(String provider) {
+            public void onProviderDisabled(@NonNull String provider) {
             }
         };
     }
+    // endregion
+
+    // region API Request Methods
+    private void setupApiRequestHandler() {
+        ApiRequestHandler apiRequestHandler = new ApiRequestHandler(this, this);
+        apiRequestHandler.makeRequests(Arrays.asList(Constants.BASE_API_URL + Constants.DATA_TYPE_FLW, Constants.BASE_API_URL + Constants.DATA_TYPE_RHRREAD));
+    }
 
     private void updateLocationName(double latitude, double longitude) {
-        String url = String.format(Locale.getDefault(), GEOCODING_API_URL, latitude, longitude, "37d9da6b6f7747e29085208abaa8b684");
-        Log.d("MainActivity", "URL: " + url);
+        String url = String.format(Locale.getDefault(), Constants.GEOCODING_API_URL, latitude, longitude, "37d9da6b6f7747e29085208abaa8b684");
         new GetLocationNameTask(response -> {
             try {
                 JSONObject jsonObject = new JSONObject(response);
                 JSONObject results = jsonObject.getJSONArray("results").getJSONObject(0);
                 String locationName = results.getString("formatted");
-                locationTextView.setText(locationName);
+                String[] locationParts = locationName.split(", ");
+                if (locationParts.length > 3) {
+                    locationName = locationParts[3];
+                }
+                locationDisplayTextView.setText(locationName);
             } catch (Exception e) {
                 Log.e("MainActivity", "Error parsing location name: " + e.getMessage());
             }
         }).execute(url);
     }
+    // endregion
 
+    // region UI Update Methods
+    @SuppressLint("SetTextI18n")
     private void updateUI() {
-        // Get data from SharedPreferences
-        SharedPreferences sharedPref = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        int iconData = sharedPref.getInt("icon", 0);
-        String outlook = sharedPref.getString("outlook", "");
-        String updateTime = sharedPref.getString("updateTime", "");
-        String humidityDataString = sharedPref.getString("humidity", "");
+        // Get data from PreferencesManager
+        int iconData = preferencesManager.getInt("icon", 0);
+        String updateTime = preferencesManager.getString("updateTime", "");
+        String outlook = preferencesManager.getString("outlook", "");
+        String humidityDataString = preferencesManager.getString("humidity", "");
+        String forecastDesc = preferencesManager.getString("forecastDesc", "");
 
         // Update iconImageView
         String iconUrl = "https://www.hko.gov.hk/images/HKOWxIconOutline/pic" + iconData + ".png";
-        ImageView iconImageView = findViewById(R.id.iconImageView);
         Glide.with(this).load(iconUrl).into(iconImageView);
 
-        // Update outlookTextView
-        TextView outlookTextView = findViewById(R.id.outlookTextView);
-        outlookTextView.setText(outlook);
+        // Update temperatureTextView
+        try {
+            JSONObject temperatureData = JsonParser.parseStringToJson(preferencesManager.getString("temperature", ""));
+            JSONArray dataArray = JsonParser.getJsonArray(temperatureData, "data");
+            if (dataArray != null) {
+                for (int i = 0; i < dataArray.length(); i++) {
+                    JSONObject data = JsonParser.getJsonObject(dataArray, i);
+                    if (JsonParser.getString(data, "place").equals("Hong Kong Observatory")) {
+                        int temperature = JsonParser.getInt(data, "value");
+                        temperatureDisplayTextView.setText(temperature + "˚");
+                        break;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e("MainActivity", "Error parsing temperature data: " + e.getMessage());
+        }
 
         // Update updateTimeTextView
         try {
@@ -138,8 +173,7 @@ public class MainActivity extends AppCompatActivity implements OnRequestComplete
             if (date != null) {
                 SimpleDateFormat readableFormat = new SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault());
                 String readableUpdateTime = readableFormat.format(date);
-                TextView updateTimeTextView = findViewById(R.id.updateTimeTextView);
-                updateTimeTextView.setText(readableUpdateTime);
+                lastUpdateTimeTextView.setText(readableUpdateTime);
             }
         } catch (Exception e) {
             Log.e("MainActivity", "Error parsing date: " + e.getMessage());
@@ -153,25 +187,20 @@ public class MainActivity extends AppCompatActivity implements OnRequestComplete
                 JSONObject firstItem = dataArray.optJSONObject(0);
                 if (firstItem != null) {
                     int value = firstItem.optInt("value");
-                    TextView humidityTextView = findViewById(R.id.humidityTextView);
-                    humidityTextView.setText(value + "%");
+                    humidityDisplayTextView.setText(value + "%");
                 }
             }
         } catch (Exception e) {
             Log.e("MainActivity", "Error parsing humidity data: " + e.getMessage());
         }
-    }
-    // endregion
 
-    // region Permission Methods
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == 1) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                setupLocationUpdates();
-            }
-        }
+        // Update outlookTextView
+        weatherOutlookTextView.setText(outlook);
+
+        // Update forecastDescTextView
+        String[] sentences = forecastDesc.split("\\.");
+        String firstSentence = sentences[0].replace("with", "with\n");
+        forecastDescriptionTextView.setText(firstSentence);
     }
     // endregion
 

@@ -21,7 +21,7 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/locationTextView"
+                android:id="@+id/locationDisplayTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
@@ -29,6 +29,16 @@
                 android:textAlignment="center"
                 android:textColor="@color/white"
                 android:textSize="34sp" />
+
+            <TextView
+                android:id="@+id/forecastDescriptionTextView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="forecastDescTextView"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="22dp"
+                android:layout_marginTop="16dp"/>
 
             <ImageView
                 android:id="@+id/iconImageView"
@@ -39,7 +49,7 @@
                 android:src="@color/white" />
 
             <TextView
-                android:id="@+id/updateTimeTextView"
+                android:id="@+id/lastUpdateTimeTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -49,7 +59,7 @@
                 android:textSize="19sp" />
 
             <TextView
-                android:id="@+id/temperatureTextView"
+                android:id="@+id/temperatureDisplayTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -82,7 +92,7 @@
                         app:srcCompat="@drawable/humidity" />
 
                     <TextView
-                        android:id="@+id/humidityTextView"
+                        android:id="@+id/humidityDisplayTextView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="80%"
@@ -94,7 +104,7 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical">
 
                     <TextView
@@ -108,10 +118,11 @@
                         android:textSize="20sp" />
 
                     <TextView
-                        android:id="@+id/outlookTextView"
+                        android:id="@+id/weatherOutlookTextView"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
                         android:layout_marginLeft="16dp"
+                        android:layout_marginRight="16dp"
                         android:layout_marginBottom="16dp"
                         android:autoSizeTextType="uniform"
                         android:text="forecastDesc"
