@@ -165,9 +165,8 @@ public class MainActivity extends AppCompatActivity implements OnRequestComplete
         int iconData = preferencesManager.getInt("icon", 0);
         String updateTime = preferencesManager.getString("updateTime", "");
         String outlook = preferencesManager.getString("outlook", "");
-        String humidityDataString = preferencesManager.getString("humidity", "");
+        int humidityValue = preferencesManager.getInt("humidityValue", 0);
         String forecastDesc = preferencesManager.getString("forecastDesc", "");
-
         // Update iconImageView
         String iconUrl = "https://www.hko.gov.hk/images/HKOWxIconOutline/pic" + iconData + ".png";
         Glide.with(this).load(iconUrl).into(iconImageView);
@@ -204,19 +203,7 @@ public class MainActivity extends AppCompatActivity implements OnRequestComplete
         }
 
         // Update humidityTextView
-        try {
-            JSONObject humidityData = new JSONObject(humidityDataString);
-            JSONArray dataArray = humidityData.optJSONArray("data");
-            if (dataArray != null && dataArray.length() > 0) {
-                JSONObject firstItem = dataArray.optJSONObject(0);
-                if (firstItem != null) {
-                    int value = firstItem.optInt("value");
-                    humidityDisplayTextView.setText(value + "%");
-                }
-            }
-        } catch (Exception e) {
-            Log.e("MainActivity", "Error parsing humidity data: " + e.getMessage());
-        }
+        humidityDisplayTextView.setText(humidityValue + "%");
 
         // Update outlookTextView
         weatherOutlookTextView.setText(outlook);
