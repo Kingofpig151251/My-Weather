@@ -85,8 +85,6 @@ public class ApiRequestHandler {
         SharedPreferences.Editor editor = sharedPref.edit();
 
         if (data.has("generalSituation") && data.has("forecastPeriod") && data.has("forecastDesc") && data.has("outlook") && data.has("updateTime")) {
-            editor.putString("generalSituation", data.optString("generalSituation"));
-            editor.putString("forecastPeriod", data.optString("forecastPeriod"));
             editor.putString("forecastDesc", data.optString("forecastDesc"));
             editor.putString("outlook", data.optString("outlook"));
             editor.putString("updateTime", data.optString("updateTime"));
@@ -106,20 +104,14 @@ public class ApiRequestHandler {
 
             JSONObject humidityData = data.optJSONObject("humidity");
             if (humidityData != null) {
-                String recordTime = humidityData.optString("recordTime");
-                editor.putString("humidityRecordTime", recordTime);
+
 
                 JSONArray dataArray = humidityData.optJSONArray("data");
                 if (dataArray != null && dataArray.length() > 0) {
                     JSONObject firstItem = dataArray.optJSONObject(0);
                     if (firstItem != null) {
-                        String unit = firstItem.optString("unit");
                         int value = firstItem.optInt("value");
-                        String place = firstItem.optString("place");
-
-                        editor.putString("humidityUnit", unit);
                         editor.putInt("humidityValue", value);
-                        editor.putString("humidityPlace", place);
                     }
                 }
             }
