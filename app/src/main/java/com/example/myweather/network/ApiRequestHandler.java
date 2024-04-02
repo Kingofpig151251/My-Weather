@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import com.example.myweather.utils.Constants;
 import com.example.myweather.utils.OnRequestCompletedListener;
 
 import org.json.JSONArray;
@@ -44,6 +45,7 @@ public class ApiRequestHandler {
         executorService.submit(() -> {  // Use the thread pool to execute the request
             try {
                 URL url = new URL(urlString);
+                Log.d("ApiRequestHandler", "Requesting data from: " + urlString);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
                 conn.connect();
@@ -58,7 +60,6 @@ public class ApiRequestHandler {
 
                 String responseData = response.toString();
                 JSONObject jsonObject = new JSONObject(responseData);
-
                 saveData(jsonObject);
 
                 handler.post(() -> {
@@ -91,20 +92,11 @@ public class ApiRequestHandler {
             editor.putString("updateTime", data.optString("updateTime"));
         }
 
-        if (data.has("rainfall") && data.has("icon") && data.has("uvindex") && data.has("temperature") && data.has("humidity")) {
-            JSONArray rainfallData = data.optJSONArray("rainfall");
-            if (rainfallData != null) {
-                editor.putString("rainfall", rainfallData.toString());
-            }
 
+        if (data.has("icon") && data.has("temperature") && data.has("humidity")) {
             JSONArray iconData = data.optJSONArray("icon");
             if (iconData != null) {
                 editor.putInt("icon", iconData.optInt(0));
-            }
-
-            JSONObject uvindexData = data.optJSONObject("uvindex");
-            if (uvindexData != null) {
-                editor.putString("uvindex", uvindexData.toString());
             }
 
             JSONObject temperatureData = data.optJSONObject("temperature");
@@ -137,10 +129,8 @@ public class ApiRequestHandler {
             JSONArray weatherForecastData = data.optJSONArray("weatherForecast");
             if (weatherForecastData != null) {
                 editor.putString("weatherForecast", weatherForecastData.toString());
-                Log.d("weatherForecast", weatherForecastData.toString());
             }
         }
-
         editor.apply();
     }
 }

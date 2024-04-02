@@ -19,8 +19,4 @@ public class PreferencesManager {
     public int getInt(String key, int defaultValue) {
         return sharedPreferences.getInt(key, defaultValue);
     }
-
-    public String getWeatherForecast() {
-        return sharedPreferences.getString("weatherForecast", null);
-    }
 }

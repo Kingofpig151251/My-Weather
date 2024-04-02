@@ -53,7 +53,7 @@ public class ForecastActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(ForecastViewHolder holder, int position) {
             PreferencesManager preferencesManager = new PreferencesManager(ForecastActivity.this);
-            String forecastString = preferencesManager.getWeatherForecast();
+            String forecastString = preferencesManager.getString("weatherForecast", null);
             if (forecastString != null) {
                 try {
                     JSONArray forecastArray = new JSONArray(forecastString);
@@ -74,7 +74,7 @@ public class ForecastActivity extends AppCompatActivity {
         @Override
         public int getItemCount() {
             PreferencesManager preferencesManager = new PreferencesManager(ForecastActivity.this);
-            String forecastString = preferencesManager.getWeatherForecast();
+            String forecastString = preferencesManager.getString("weatherForecast", null);
             if (forecastString != null) {
                 try {
                     JSONArray forecastArray = new JSONArray(forecastString);
