@@ -6,7 +6,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-import com.example.myweather.utils.Constants;
 import com.example.myweather.utils.OnRequestCompletedListener;
 
 import org.json.JSONArray;
@@ -22,10 +21,10 @@ import java.util.concurrent.Executors;
 
 public class ApiRequestHandler {
     private static final String PREFS_NAME = "Weather";
-    private Context context;
-    private Handler handler;
-    private OnRequestCompletedListener listener;
-    private ExecutorService executorService;
+    private final Context context;
+    private final Handler handler;
+    private final OnRequestCompletedListener listener;
+    private final ExecutorService executorService;
 
 
     public ApiRequestHandler(Context context, OnRequestCompletedListener listener) {
