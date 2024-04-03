@@ -53,7 +53,6 @@ public class MainActivity extends AppCompatActivity implements OnRequestComplete
     private TextView humidityDisplayTextView;
     private TextView weatherOutlookTextView;
     private TextView temperatureDisplayTextView;
-    private Button GoToForecastPageButton;
     // endregion
 
     // region onCreate Methods
@@ -71,8 +70,8 @@ public class MainActivity extends AppCompatActivity implements OnRequestComplete
         preferencesManager = new PreferencesManager(this);
         setupApiRequestHandler();
         requestLocationPermission();
-        GoToForecastPageButton = findViewById(R.id.GoToForecastPageButton);
-        GoToForecastPageButton.setOnClickListener(v -> {
+        Button goToForecastPageButton = findViewById(R.id.GoToForecastPageButton);
+        goToForecastPageButton.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, ForecastActivity.class);
             startActivity(intent);
         });

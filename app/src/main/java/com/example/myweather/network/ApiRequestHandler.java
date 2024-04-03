@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 
 import com.example.myweather.utils.OnRequestCompletedListener;
 
@@ -31,7 +30,7 @@ public class ApiRequestHandler {
         this.context = context;
         this.listener = listener;
         this.handler = new Handler(Looper.getMainLooper());
-        this.executorService = Executors.newFixedThreadPool(5);  // Create a thread pool
+        this.executorService = Executors.newFixedThreadPool(1);  // Create a thread pool
     }
 
     public void makeRequests(List<String> urlStrings) {
@@ -44,7 +43,6 @@ public class ApiRequestHandler {
         executorService.submit(() -> {  // Use the thread pool to execute the request
             try {
                 URL url = new URL(urlString);
-                Log.d("ApiRequestHandler", "Requesting data from: " + urlString);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
                 conn.connect();

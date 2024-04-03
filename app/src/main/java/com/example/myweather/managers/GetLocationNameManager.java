@@ -8,8 +8,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Scanner;
 
+@SuppressWarnings("ALL")
 public class GetLocationNameManager extends AsyncTask<String, Void, String> {
-    private OnTaskCompleted listener;
+    private final OnTaskCompleted listener;
 
     public GetLocationNameManager(OnTaskCompleted listener) {
         this.listener = listener;
@@ -17,19 +18,19 @@ public class GetLocationNameManager extends AsyncTask<String, Void, String> {
 
     @Override
     protected String doInBackground(String... urls) {
-        String response = "";
+        StringBuilder response = new StringBuilder();
         try {
             URL url = new URL(urls[0]);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             InputStream inputStream = connection.getInputStream();
             Scanner scanner = new Scanner(inputStream);
             while (scanner.hasNext()) {
-                response += scanner.nextLine();
+                response.append(scanner.nextLine());
             }
         } catch (Exception e) {
             Log.e("GetLocationNameTask", "Error getting location name: " + e.getMessage());
         }
-        return response;
+        return response.toString();
     }
 
     @Override

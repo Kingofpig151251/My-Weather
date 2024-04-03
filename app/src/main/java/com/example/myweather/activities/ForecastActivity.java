@@ -1,14 +1,12 @@
 package com.example.myweather.activities;
 
-import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,27 +21,21 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class ForecastActivity extends AppCompatActivity {
-    private RecyclerView recyclerView;
-    private Button backButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forecast);
-        recyclerView = findViewById(R.id.forecastRecyclerView);
+        RecyclerView recyclerView = findViewById(R.id.forecastRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
-        backButton = findViewById(R.id.backButton);
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+        Button backButton = findViewById(R.id.backButton);
+        backButton.setOnClickListener(v -> finish());
     }
 
     RecyclerView.Adapter<ForecastViewHolder> adapter = new RecyclerView.Adapter<ForecastViewHolder>() {
+        @NonNull
         @Override
         public ForecastViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_forecast, parent, false);
@@ -51,7 +43,7 @@ public class ForecastActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onBindViewHolder(ForecastViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull ForecastViewHolder holder, int position) {
             PreferencesManager preferencesManager = new PreferencesManager(ForecastActivity.this);
             String forecastString = preferencesManager.getString("weatherForecast", null);
             if (forecastString != null) {
